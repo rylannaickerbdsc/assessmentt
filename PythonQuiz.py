@@ -1,11 +1,20 @@
+from datetime import datetime
 
-age = input("Please enter your age: ")
+def is_age_16_or_older(dob_str):
+    try:
+        dob = datetime.strptime(dob_str, "%Y-%m-%d")
+    except ValueError:
+        return "Invalid date format. Please use YYYY-MM-DD."
 
-try:
-    age = int(age)
+    today = datetime.today()
+    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
     if age >= 16:
-        print("Welcome.")
+        return "You are 16 or older."
     else:
-        print("You must be at least 16 years old.")
-except ValueError:
-    print("Please enter a valid number.")
+        return "You must be at least 16 years old."
+
+# Example usage:
+dob_input = input("Enter your date of birth (YYYY-MM-DD): ")
+result = is_age_16_or_older(dob_input)
+print(result)
