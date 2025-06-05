@@ -9,6 +9,7 @@ def is_age_16_or_older(dob_str):
     today = datetime.today()
     age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
 
+
     if age >= 16:
         return True, "You are 16 or older."
     else:
