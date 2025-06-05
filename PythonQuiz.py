@@ -37,4 +37,25 @@ if allowed:
     if answer == "B":
         score += 1
 
-    print("\nYou got", score, "out of 2 correct.")
+    print("\n3. When is it legal to use a mobile phone while driving?")
+    print("A. When using hands-free equipment")
+    print("B. When you're driving slowly")
+    answer = input("Your answer: ").upper()
+    if answer == "A":
+        score += 1
+
+    print("\n4. What does a yellow traffic light mean?")
+    print("A. Speed up to beat the red")
+    print("B. Prepare to stop")
+    answer = input("Your answer: ").upper()
+    if answer == "B":
+        score += 1
+
+    print("\n5. What must you do when you hear a siren coming from an emergency vehicle?")
+    print("A. Continue driving normally")
+    print("B. Pull over and stop")
+    answer = input("Your answer: ").upper()
+    if answer == "B":
+        score += 1
+
+    print("\nYou got", score, "out of 5 correct.")
