@@ -2,9 +2,17 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 from datetime import datetime
+from PIL import Image, ImageTk
+import os
 
 # Quiz questions
 questions = [
+    {
+        "question": "Does the driver of the blue car have to give way?",
+        "options": ["Yes", "No"],
+        "answer": "No",
+        "image": "ef9fdf21-7670-43bd-909e-a7b62b0d27e6.png"
+    },
     {
         "question": "What does a red traffic light mean?",
         "options": ["Stop", "Go"],
@@ -36,10 +44,11 @@ class QuizApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Driver Safety Quiz")
-        self.root.geometry("450x350")
+        self.root.geometry("500x550")
         self.root.resizable(False, False)
         self.score = 0
         self.question_index = 0
+        self.tk_image = None  # Keep reference to prevent garbage collection
 
         self.create_dob_screen()
 
@@ -82,10 +91,22 @@ class QuizApp:
 
         if self.question_index < len(questions):
             q = questions[self.question_index]
-            tk.Label(self.root, text=f"Question {self.question_index + 1} of {len(questions)}", 
+
+            tk.Label(self.root, text=f"Question {self.question_index + 1} of {len(questions)}",
                      font=("Helvetica", 12, "italic")).pack(pady=(5, 0))
             tk.Label(self.root, text=q["question"], font=("Helvetica", 13, "bold"),
                      wraplength=400, justify="left").pack(pady=10)
+
+            # Display image if present
+            if "image" in q:
+                image_path = os.path.join(os.getcwd(), q["image"])
+                try:
+                    img = Image.open(image_path)
+                    img = img.resize((400, 300))
+                    self.tk_image = ImageTk.PhotoImage(img)
+                    tk.Label(self.root, image=self.tk_image).pack(pady=5)
+                except Exception as e:
+                    tk.Label(self.root, text="Image could not be loaded.", fg="red").pack()
 
             self.selected_option = tk.StringVar(value="")
 
