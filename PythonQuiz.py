@@ -11,17 +11,19 @@ questions = [
         "question": "Does the driver of the blue car have to give way?",
         "options": ["Yes", "No"],
         "answer": "No",
-        "image": "ef9fdf21-7670-43bd-909e-a7b62b0d27e6.png"
+        "image": "bluecargiveway1.png"
     },
     {
-        "question": "What does a red traffic light mean?",
-        "options": ["Stop", "Go"],
-        "answer": "Stop"
+        "question": "What does this sign mean?",
+        "options": ["Keep Left", "Turn Left","U-Turn"],
+        "answer": "Keep Left",
+        "image": "keepleftsign.png"
+        
     },
     {
-        "question": "What should you do at a stop sign?",
-        "options": ["Slow down", "Stop completely"],
-        "answer": "Stop completely"
+        "question": "How many standard drinks can you have before driving if you are under 20 years old?",
+        "options": ["One", "Two","Three","None"],
+        "answer": "None"
     },
     {
         "question": "When is it legal to use a mobile phone while driving?",
@@ -99,7 +101,7 @@ class QuizApp:
 
             # Display image if present
             if "image" in q:
-                image_path = os.path.join(os.getcwd(), q["image"])
+                image_path = os.path.join("images", q["image"])
                 try:
                     img = Image.open(image_path)
                     img = img.resize((400, 300))
