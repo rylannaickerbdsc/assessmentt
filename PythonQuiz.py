@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 from datetime import datetime
 
 # Quiz questions
@@ -31,7 +32,6 @@ questions = [
     }
 ]
 
-# Main App Class
 class QuizApp:
     def __init__(self, root):
         self.root = root
@@ -73,10 +73,17 @@ class QuizApp:
 
     def show_question(self):
         self.clear_screen()
+
+        # Progress bar
+        progress_value = int((self.question_index / len(questions)) * 100)
+        self.progress = ttk.Progressbar(self.root, length=400, mode='determinate', maximum=100)
+        self.progress['value'] = progress_value
+        self.progress.pack(pady=(10, 5))
+
         if self.question_index < len(questions):
             q = questions[self.question_index]
             tk.Label(self.root, text=f"Question {self.question_index + 1} of {len(questions)}", 
-                     font=("Helvetica", 12, "italic")).pack(pady=(10, 0))
+                     font=("Helvetica", 12, "italic")).pack(pady=(5, 0))
             tk.Label(self.root, text=q["question"], font=("Helvetica", 13, "bold"),
                      wraplength=400, justify="left").pack(pady=10)
 
