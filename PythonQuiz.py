@@ -36,7 +36,8 @@ class QuizApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Driver Safety Quiz")
-        self.root.geometry("400x300")
+        self.root.geometry("450x350")
+        self.root.resizable(False, False)
         self.score = 0
         self.question_index = 0
 
@@ -44,17 +45,16 @@ class QuizApp:
 
     def create_dob_screen(self):
         self.clear_screen()
-        self.label = tk.Label(self.root, text="Enter your date of birth (YYYY-MM-DD):")
-        self.label.pack(pady=10)
+        tk.Label(self.root, text="Enter your date of birth", font=("Helvetica", 14)).pack(pady=20)
+        tk.Label(self.root, text="(YYYY-MM-DD)", font=("Helvetica", 10)).pack()
 
-        self.dob_entry = tk.Entry(self.root)
-        self.dob_entry.pack(pady=5)
+        self.dob_entry = tk.Entry(self.root, font=("Helvetica", 12), width=20)
+        self.dob_entry.pack(pady=10)
 
-        self.submit_button = tk.Button(self.root, text="Submit", command=self.check_age)
-        self.submit_button.pack(pady=10)
+        tk.Button(self.root, text="Submit", command=self.check_age, font=("Helvetica", 12)).pack(pady=10)
 
     def check_age(self):
-        dob_str = self.dob_entry.get()
+        dob_str = self.dob_entry.get().strip()
         try:
             dob = datetime.strptime(dob_str, "%Y-%m-%d")
             today = datetime.today()
@@ -62,7 +62,7 @@ class QuizApp:
             if age >= 16:
                 self.start_quiz()
             else:
-                messagebox.showinfo("Age Check", "You must be at least 16 years old to take the quiz.")
+                messagebox.showinfo("Age Restriction", "You must be at least 16 years old to take the quiz.")
         except ValueError:
             messagebox.showerror("Invalid Input", "Please enter a valid date in YYYY-MM-DD format.")
 
@@ -75,17 +75,18 @@ class QuizApp:
         self.clear_screen()
         if self.question_index < len(questions):
             q = questions[self.question_index]
-            self.q_label = tk.Label(self.root, text=q["question"], wraplength=380, justify="left")
-            self.q_label.pack(pady=10)
+            tk.Label(self.root, text=f"Question {self.question_index + 1} of {len(questions)}", 
+                     font=("Helvetica", 12, "italic")).pack(pady=(10, 0))
+            tk.Label(self.root, text=q["question"], font=("Helvetica", 13, "bold"),
+                     wraplength=400, justify="left").pack(pady=10)
 
-            self.selected_option = tk.StringVar()
+            self.selected_option = tk.StringVar(value="")
 
             for option in q["options"]:
-                rb = tk.Radiobutton(self.root, text=option, variable=self.selected_option, value=option)
-                rb.pack(anchor="w")
+                tk.Radiobutton(self.root, text=option, variable=self.selected_option, value=option,
+                               font=("Helvetica", 12)).pack(anchor="w", padx=20)
 
-            self.next_button = tk.Button(self.root, text="Next", command=self.check_answer)
-            self.next_button.pack(pady=10)
+            tk.Button(self.root, text="Next", command=self.check_answer, font=("Helvetica", 12)).pack(pady=20)
         else:
             self.show_result()
 
@@ -104,9 +105,12 @@ class QuizApp:
 
     def show_result(self):
         self.clear_screen()
-        result = f"You scored {self.score} out of {len(questions)}"
-        result_label = tk.Label(self.root, text=result, font=("Helvetica", 14))
-        result_label.pack(pady=20)
+        tk.Label(self.root, text="Quiz Completed!", font=("Helvetica", 16, "bold")).pack(pady=20)
+        result_text = f"You scored {self.score} out of {len(questions)}"
+        tk.Label(self.root, text=result_text, font=("Helvetica", 14)).pack(pady=10)
+
+        tk.Button(self.root, text="Retake Quiz", command=self.create_dob_screen, font=("Helvetica", 12)).pack(pady=10)
+        tk.Button(self.root, text="Exit", command=self.root.quit, font=("Helvetica", 12)).pack(pady=5)
 
     def clear_screen(self):
         for widget in self.root.winfo_children():
