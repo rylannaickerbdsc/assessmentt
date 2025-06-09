@@ -1,23 +1,24 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
-from tkinter import ttk
 from datetime import datetime
 from PIL import Image, ImageTk
 import os
 
-# Quiz questions
+ctk.set_appearance_mode("System")        # light / dark / system
+ctk.set_default_color_theme("dark-blue")  # theme pack
+
 questions = [
     {
         "question": "Does the driver of the blue car have to give way?",
         "options": ["Yes", "No"],
         "answer": "No",
-        "image": "bluecargiveway1.png"
+        "image": "question1.png"
     },
     {
         "question": "What does this sign mean?",
         "options": ["Keep Left", "Turn Left","U-Turn"],
         "answer": "Keep Left",
-        "image": "keepleftsign.png"
+        "image": "question2.png"
         
     },
     {
@@ -42,113 +43,92 @@ questions = [
     }
 ]
 
-class QuizApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Driver Safety Quiz")
-        self.root.geometry("500x550")
-        self.root.resizable(False, False)
+
+class QuizApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Driver Safety Quiz")
+        self.geometry("600x700")
         self.score = 0
-        self.question_index = 0
-        self.tk_image = None  # Keep reference to prevent garbage collection
+        self.qi = 0
+        self.img_ref = None
+        self.create_dob()
 
-        self.create_dob_screen()
-
-    def create_dob_screen(self):
-        self.clear_screen()
-        tk.Label(self.root, text="Enter your date of birth", font=("Helvetica", 14)).pack(pady=20)
-        tk.Label(self.root, text="(YYYY-MM-DD)", font=("Helvetica", 10)).pack()
-
-        self.dob_entry = tk.Entry(self.root, font=("Helvetica", 12), width=20)
-        self.dob_entry.pack(pady=10)
-
-        tk.Button(self.root, text="Submit", command=self.check_age, font=("Helvetica", 12)).pack(pady=10)
+    def create_dob(self):
+        self.clear()
+        self.dob = ctk.CTkEntry(self, placeholder_text="YYYY-MM-DD", width=200)
+        self.dob.pack(pady=40)
+        ctk.CTkButton(self, text="Start Quiz", command=self.check_age).pack(pady=20)
 
     def check_age(self):
-        dob_str = self.dob_entry.get().strip()
         try:
-            dob = datetime.strptime(dob_str, "%Y-%m-%d")
-            today = datetime.today()
-            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+            dob = datetime.strptime(self.dob.get(), "%Y-%m-%d")
+            age = (datetime.today().year - dob.year) - ((datetime.today().month, datetime.today().day) < (dob.month, dob.day))
             if age >= 16:
-                self.start_quiz()
+                self.score = 0
+                self.qi = 0
+                self.show_q()
             else:
-                messagebox.showinfo("Age Restriction", "You must be at least 16 years old to take the quiz.")
-        except ValueError:
-            messagebox.showerror("Invalid Input", "Please enter a valid date in YYYY-MM-DD format.")
+                messagebox.showinfo("Oops", "You must be 16+")
+        except:
+            messagebox.showerror("Invalid", "Use YYYY-MM-DD")
 
-    def start_quiz(self):
-        self.score = 0
-        self.question_index = 0
-        self.show_question()
+    def show_q(self):
+        self.clear()
+        q = questions[self.qi]
+        ctk.CTkLabel(self, text=f"Question {self.qi+1}/{len(questions)}", font=("sans", 14)).pack(pady=10)
+        bar = ctk.CTkProgressBar(self, width=500)
+        bar.set(self.qi / len(questions))
+        bar.pack(pady=(0,15))
 
-    def show_question(self):
-        self.clear_screen()
+        ctk.CTkLabel(self, text=q["question"], font=("sans", 16, "bold"), wraplength=550).pack(pady=10)
 
-        # Progress bar
-        progress_value = int((self.question_index / len(questions)) * 100)
-        self.progress = ttk.Progressbar(self.root, length=400, mode='determinate', maximum=100)
-        self.progress['value'] = progress_value
-        self.progress.pack(pady=(10, 5))
+        if "image" in q:
+            p = os.path.join("images", q["image"])
+            try:
+                im = Image.open(p).resize((500,300), Image.LANCZOS)
+                self.img_ref = ImageTk.PhotoImage(im)
+                ctk.CTkLabel(self, image=self.img_ref).pack(pady=10)
+            except:
+                ctk.CTkLabel(self, text="Image load failed", text_color="red").pack()
 
-        if self.question_index < len(questions):
-            q = questions[self.question_index]
+        self.var = ctk.StringVar(value="")  # initialize empty value
+        for opt in q["options"]:
+            ctk.CTkRadioButton(self, text=opt, variable=self.var, value=opt).pack(anchor="w", padx=50, pady=5)
 
-            tk.Label(self.root, text=f"Question {self.question_index + 1} of {len(questions)}",
-                     font=("Helvetica", 12, "italic")).pack(pady=(5, 0))
-            tk.Label(self.root, text=q["question"], font=("Helvetica", 13, "bold"),
-                     wraplength=400, justify="left").pack(pady=10)
+        ctk.CTkButton(self, text="Next", command=self.process).pack(pady=20)
 
-            # Display image if present
-            if "image" in q:
-                image_path = os.path.join("images", q["image"])
-                try:
-                    img = Image.open(image_path)
-                    img = img.resize((400, 300))
-                    self.tk_image = ImageTk.PhotoImage(img)
-                    tk.Label(self.root, image=self.tk_image).pack(pady=5)
-                except Exception as e:
-                    tk.Label(self.root, text="Image could not be loaded.", fg="red").pack()
-
-            self.selected_option = tk.StringVar(value="")
-
-            for option in q["options"]:
-                tk.Radiobutton(self.root, text=option, variable=self.selected_option, value=option,
-                               font=("Helvetica", 12)).pack(anchor="w", padx=20)
-
-            tk.Button(self.root, text="Next", command=self.check_answer, font=("Helvetica", 12)).pack(pady=20)
-        else:
-            self.show_result()
-
-    def check_answer(self):
-        selected = self.selected_option.get()
-        if not selected:
-            messagebox.showwarning("Selection Required", "Please select an answer before continuing.")
+    def process(self):
+        if self.var.get() == "":
+            messagebox.showwarning("Pick one", "Select an option")
             return
-
-        correct_answer = questions[self.question_index]["answer"]
-        if selected == correct_answer:
+        if self.var.get() == questions[self.qi]["answer"]:
             self.score += 1
+        self.qi += 1
+        if self.qi < len(questions):
+            self.show_q()
+        else:
+            self.show_res()
 
-        self.question_index += 1
-        self.show_question()
+    def show_res(self):
+        self.clear()
+        ctk.CTkLabel(self, text="Quiz Complete!", font=("sans", 20, "bold")).pack(pady=30)
+        ctk.CTkLabel(self, text=f"Score: {self.score}/{len(questions)}", font=("sans", 18)).pack(pady=10)
 
-    def show_result(self):
-        self.clear_screen()
-        tk.Label(self.root, text="Quiz Completed!", font=("Helvetica", 16, "bold")).pack(pady=20)
-        result_text = f"You scored {self.score} out of {len(questions)}"
-        tk.Label(self.root, text=result_text, font=("Helvetica", 14)).pack(pady=10)
+        # Restart quiz by resetting the state and showing the DOB screen again
+        ctk.CTkButton(self, text="Restart", command=self.restart_quiz).pack(pady=10)
+        ctk.CTkButton(self, text="Exit", command=self.destroy).pack(pady=5)
 
-        tk.Button(self.root, text="Retake Quiz", command=self.create_dob_screen, font=("Helvetica", 12)).pack(pady=10)
-        tk.Button(self.root, text="Exit", command=self.root.quit, font=("Helvetica", 12)).pack(pady=5)
+    def restart_quiz(self):
+        self.score = 0
+        self.qi = 0
+        self.create_dob()
 
-    def clear_screen(self):
-        for widget in self.root.winfo_children():
-            widget.destroy()
+    def clear(self):
+        for w in self.winfo_children():
+            w.destroy()
 
-
-# Launch the app
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = QuizApp(root)
-    root.mainloop()
+if __name__=="__main__":
+    os.makedirs("images", exist_ok=True)
+    app = QuizApp()
+    app.mainloop()
